@@ -2,7 +2,10 @@ package de.fra_uas.fb2.mobiledevices.whatsappchatanalyzer
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -18,6 +21,10 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var openDocumentLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var textViewFileContent: TextView
+    private val messageCounts = mutableMapOf<String, Int>()
+    private lateinit var ratioMessages: TextView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var progressBarBackground: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +36,13 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+
         textViewFileContent = findViewById(R.id.text_view_file_content)
+        ratioMessages = findViewById(R.id.ratio_of_messages)
+        progressBar = findViewById(R.id.stats_progressbar)
+        progressBarBackground = findViewById(R.id.background_progressbar)
+        progressBarBackground.visibility = View.INVISIBLE
+        progressBar.visibility = View.INVISIBLE
 
         openDocumentLauncher = registerForActivityResult(
             ActivityResultContracts.OpenDocument()
@@ -40,13 +53,13 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "File selection cancelled", Toast.LENGTH_SHORT).show()
             }
         }
-
-        val buttonOpenFile: Button = findViewById(R.id.button)
-        buttonOpenFile.setOnClickListener {
-            performFileSearch()
-        }
     }
+    
+    fun openFileButton(view: View) {
+        performFileSearch()
 
+    }
+    
     private fun performFileSearch() {
         // Trigger the document picker
         openDocumentLauncher.launch(arrayOf("text/plain"))
@@ -54,19 +67,53 @@ class MainActivity : AppCompatActivity() {
 
     private fun readTextFromUri(uri: Uri) {
         val contentResolver = contentResolver
+        messageCounts.clear()
         try {
             contentResolver.openInputStream(uri)?.use { inputStream ->
                 BufferedReader(InputStreamReader(inputStream)).use { reader ->
                     val stringBuilder = StringBuilder()
                     var line = reader.readLine()
                     while (line != null) {
-                        stringBuilder.append(line)
-                        stringBuilder.append('\n')
+                        if (line.length>17&&line[0].isDigit()&& line[16] == '-') {
+                            val trimmedLine = line.removeRange(0, 17)
+                            stringBuilder.append(trimmedLine)
+                            stringBuilder.append('\n')
+                            val nameEndIndex = trimmedLine.indexOf(':')
+                            if (nameEndIndex != -1) {
+                                val name = trimmedLine.substring(0, nameEndIndex)
+                                messageCounts[name] = messageCounts.getOrDefault(name, 0) + 1
+                                stringBuilder.append("Message count for $name: ${messageCounts[name]}")
+                                stringBuilder.append('\n')
+                            }
+                        }
                         line = reader.readLine()
                     }
-                    // Display the text in the TextView
-                    textViewFileContent.text = stringBuilder.toString()
                 }
+                val ratio = StringBuilder()
+                var one = 0
+                var two = 0
+                val stringBuilder = StringBuilder()
+                for ((name, count) in messageCounts) {
+                    stringBuilder.append("Message count for $name: $count \n")
+
+                    if(one==0) {
+                        one = count
+                        ratio.append("$count/")
+                    }else if(two==0){
+                        two = count
+                        ratio.append("$count")
+                        textViewFileContent.visibility = View.VISIBLE
+                        progressBar.visibility = View.VISIBLE
+                        progressBarBackground.visibility = View.VISIBLE
+                    }else if(two!=0){
+                        progressBar.visibility = View.INVISIBLE
+                        progressBarBackground.visibility = View.INVISIBLE
+                        ratioMessages.visibility = View.INVISIBLE
+                    }
+                }
+                textViewFileContent.text = stringBuilder.toString()
+                ratioMessages.text = ratio.toString()
+                progressBar.progress= two.toFloat().div((two+one).toFloat()).times(100).toInt()
             }
         } catch (e: Exception) {
             e.printStackTrace()
