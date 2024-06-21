@@ -73,11 +73,12 @@ class MainActivity : AppCompatActivity() {
             val nameEndIndex = line.indexOf(':')
             val trimmedLine = line.removeRange(0, nameEndIndex+1)                                   //remove the name to only count the message chars
             for (c in trimmedLine) {
-                if(c==char)
-                    if (nameEndIndex != -1) {
-                        val name = line.substring(0, nameEndIndex)
+                if (nameEndIndex != -1) {
+                    val name = line.substring(0, nameEndIndex)
+                    if(c==char) {
                         messageCounts[name] = messageCounts.getOrDefault(name, 0) + 1
-                    }
+                    }else messageCounts[name] = messageCounts.getOrDefault(name, 0)
+                }
             }
         }
         textViewFileContent.text ="You searched for '$char':\n"
@@ -93,12 +94,12 @@ class MainActivity : AppCompatActivity() {
             val trimmedLine = line.removeRange(0, nameEndIndex+1)                                   //remove the name to only count the message chars
             val words = trimmedLine.split(" ")
             for (words in words) {
-                if(words==word)
-                    if (nameEndIndex != -1) {
-                        val name = line.substring(0, nameEndIndex)
+                if (nameEndIndex != -1) {
+                    val name = line.substring(0, nameEndIndex)
+                    if(words==word) {
                         messageCounts[name] = messageCounts.getOrDefault(name, 0) + 1
-                        Log.d("line", line)
-                    }
+                    }else messageCounts[name] = messageCounts.getOrDefault(name, 0)
+                }
             }
         }
         textViewFileContent.text ="You searched for '$word':\n"
@@ -113,12 +114,12 @@ class MainActivity : AppCompatActivity() {
             val trimmedLine = line.removeRange(0, nameEndIndex+1)                                   //remove the name to only count the message chars
             val words = trimmedLine.split(" ")
             for (word in words) {
-                if(word.contains(emoji))
-                    if (nameEndIndex != -1) {
-                        val name = line.substring(0, nameEndIndex)
+                if (nameEndIndex != -1) {
+                    val name = line.substring(0, nameEndIndex)
+                    if(word.contains(emoji)) {
                         messageCounts[name] = messageCounts.getOrDefault(name, 0) + 1
-                        Log.d("line", line)
-                    }
+                    }else messageCounts[name] = messageCounts.getOrDefault(name, 0)
+                }
             }
         }
         textViewFileContent.text ="You searched for '$emoji':\n"
@@ -228,6 +229,10 @@ class MainActivity : AppCompatActivity() {
             ratioMessages.visibility = View.INVISIBLE
             stringBuilder.append("Nothing found")
         }else {
+            ratioMessages.visibility = View.VISIBLE
+            textViewFileContent.visibility = View.VISIBLE
+            progressBar.visibility = View.VISIBLE
+            progressBarBackground.visibility = View.VISIBLE
             for ((name, count) in messageCounts) {
                 stringBuilder.append("Total number for $name: $count \n")
                 if (one == 0) {
@@ -236,9 +241,6 @@ class MainActivity : AppCompatActivity() {
                 } else if (two == 0) {
                     two = count
                     ratio.append("$count")
-                    textViewFileContent.visibility = View.VISIBLE
-                    progressBar.visibility = View.VISIBLE
-                    progressBarBackground.visibility = View.VISIBLE
                 } else if (two != 0) {
                     progressBar.visibility = View.INVISIBLE
                     progressBarBackground.visibility = View.INVISIBLE
