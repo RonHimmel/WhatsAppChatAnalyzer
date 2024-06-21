@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">WhatsAppChatAnalyzer</string>
+    <string name="info_text">1. Export a Chat in Whatsapp\n\n2. Open it in this app\n\n3. Choose parameters to analyze</string>
 </resources>
