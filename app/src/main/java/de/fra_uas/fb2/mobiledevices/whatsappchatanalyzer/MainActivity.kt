@@ -44,6 +44,10 @@ class MainActivity : AppCompatActivity() {
         progressBarBackground.visibility = View.INVISIBLE
         progressBar.visibility = View.INVISIBLE
 
+        textViewFileContent.text = "1. Export a Chat in Whatsapp\n\n2. Open it in this app\n\n3. " +
+                "Choose which " +
+                "parameters to analyze"
+
         openDocumentLauncher = registerForActivityResult(
             ActivityResultContracts.OpenDocument()
         ) { uri: Uri? ->
@@ -52,6 +56,26 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "File selection cancelled", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+    fun charButton(view: View) {
+        if(progressBar.visibility == View.INVISIBLE) {
+            Toast.makeText(this, "No file selected yet", Toast.LENGTH_SHORT).show()
+        }
+    }
+    fun emojiButton(view: View) {
+        if(progressBar.visibility == View.INVISIBLE) {
+            Toast.makeText(this, "No file selected yet", Toast.LENGTH_SHORT).show()
+        }
+    }
+    fun wordButton(view: View) {
+        if(progressBar.visibility == View.INVISIBLE) {
+            Toast.makeText(this, "No file selected yet", Toast.LENGTH_SHORT).show()
+        }
+    }
+    fun startButton(view: View) {
+        if(progressBar.visibility == View.INVISIBLE) {
+            Toast.makeText(this, "No file selected yet", Toast.LENGTH_SHORT).show()
         }
     }
     
@@ -119,4 +143,6 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
     }
+
+
 }
