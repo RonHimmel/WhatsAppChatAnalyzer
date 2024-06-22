@@ -11,9 +11,6 @@
         <item name="colorPrimary">@color/buttonDay</item>
         <item name="colorOnPrimary">@color/black</item>
 
-
-        <!-- Background and text colors for light mode. -->
-        <item name="android:textColorSecondary">@color/buttonDay</item>
     </style>
 
 

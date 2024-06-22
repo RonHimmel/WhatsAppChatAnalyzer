@@ -2,7 +2,6 @@ package de.fra_uas.fb2.mobiledevices.whatsappchatanalyzer
 
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.ProgressBar
@@ -11,6 +10,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -20,10 +20,11 @@ import java.io.InputStreamReader
 
 class MainActivity : AppCompatActivity() {
 
+    private val viewModel: MainViewModel by viewModels()
     private lateinit var openDocumentLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var textViewFileContent: TextView
-    private val messageCounts = mutableMapOf<String, Int>()
-    private val allMessages = StringBuilder()
+    private var messageCounts = mutableMapOf<String, Int>()
+    private var allMessages = StringBuilder()
     private lateinit var ratioMessages: TextView
     private lateinit var progressBar: ProgressBar
     private lateinit var progressBarBackground: ProgressBar
@@ -38,15 +39,12 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-
         textViewFileContent = findViewById(R.id.text_view_file_content)
         ratioMessages = findViewById(R.id.ratio_of_messages)
         progressBar = findViewById(R.id.stats_progressbar)
         progressBarBackground = findViewById(R.id.background_progressbar)
         progressBarBackground.visibility = View.INVISIBLE
         progressBar.visibility = View.INVISIBLE
-
-        textViewFileContent.text = getString(R.string.info_text)
 
         openDocumentLauncher = registerForActivityResult(
             ActivityResultContracts.OpenDocument()
@@ -57,7 +55,31 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "File selection cancelled", Toast.LENGTH_SHORT).show()
             }
         }
+        if(viewModel.textViewContent=="") {                                                         //view model will not be used at first -> info text is shown
+            textViewFileContent.text = getString(R.string.info_text)
+        }else if (viewModel.messageCounts.isNotEmpty()&& viewModel.allMessages.isNotEmpty()){
+            val text = viewModel.textViewContent.split("\n")                              //the first line is not made by the build diagram function so we have to add it first
+            textViewFileContent.text = text[0]+"\n"
+            allMessages.clear()
+            allMessages=viewModel.allMessages
+            messageCounts.clear()
+            messageCounts=viewModel.messageCounts
+            buildDiagram()                                                                          //appends the missing lines to the text view
+        }else textViewFileContent.text = viewModel.textViewContent
+
     }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        viewModel.textViewContent = textViewFileContent.text.toString()
+        if(messageCounts.isNotEmpty()) {
+            viewModel.messageCounts = messageCounts
+        }
+        if(allMessages.isNotEmpty()) {
+            viewModel.allMessages = allMessages
+        }
+    }
+
     fun charButton(view: View) {
         if(allMessages.isEmpty()) {
             Toast.makeText(this, "No file selected yet", Toast.LENGTH_SHORT).show()
@@ -229,6 +251,13 @@ class MainActivity : AppCompatActivity() {
         performFileSearch()
     }
 
+    fun questionButton(view: View) {
+        textViewFileContent.text = getString(R.string.question_text)
+        progressBar.visibility = View.INVISIBLE
+        progressBarBackground.visibility = View.INVISIBLE
+        ratioMessages.visibility = View.INVISIBLE
+    }
+
     private fun performFileSearch() {
         // Trigger the document picker
         openDocumentLauncher.launch(arrayOf("text/plain"))
@@ -249,8 +278,12 @@ class MainActivity : AppCompatActivity() {
             textViewFileContent.visibility = View.VISIBLE
             progressBar.visibility = View.VISIBLE
             progressBarBackground.visibility = View.VISIBLE
+            var index = 1
             for ((name, count) in messageCounts) {
-                stringBuilder.append("Total number for $name: $count \n")
+                if(index==messageCounts.size) {
+                    stringBuilder.append("Total number for $name: $count")
+                }else stringBuilder.append("Total number for $name: $count\n")
+                index++
                 if (one == 0) {
                     one = count
                     ratio.append("$count/")
