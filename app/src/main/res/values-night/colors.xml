@@ -2,4 +2,5 @@
 <resources>
     <color name="progressColor1">@color/black</color>
     <color name="progressColor2">@color/buttonNight</color>
+    <color name="font">@color/white</color>
 </resources>
