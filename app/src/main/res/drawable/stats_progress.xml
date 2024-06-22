@@ -5,8 +5,8 @@
     <shape
         android:innerRadius="75dp"
         android:shape="ring"
-        android:thickness="50dp"
+        android:thickness="80dp"
         android:useLevel="true">
-        <solid android:color="#FFA2FFF7" />
+        <solid android:color="@color/progressColor1" />
     </shape>
 </rotate>

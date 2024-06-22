@@ -2,4 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="buttonNight">#075E54</color>
+    <color name="buttonDay">#dcf8c6</color>
+    <color name="progressColor1">@color/white</color>
+    <color name="progressColor2">@color/buttonDay</color>
 </resources>
