@@ -5,58 +5,63 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
     tools:context=".MainActivity">
 
 
     <Button
         android:id="@+id/emoji_button"
-        android:layout_width="66dp"
-        android:layout_height="45dp"
+        android:layout_width="80dp"
+        android:layout_height="60dp"
         android:onClick="emojiButton"
         android:text="emoji"
-        android:textSize="7sp"
+        android:textSize="12sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.895"
+        app:layout_constraintHorizontal_bias="0.939"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.796" />
+        app:layout_constraintVertical_bias="0.795" />
 
     <Button
         android:id="@+id/start_button"
-        android:layout_width="66dp"
-        android:layout_height="45dp"
+        android:layout_width="80dp"
+        android:layout_height="60dp"
         android:onClick="startButton"
-        android:text="start"
-        android:textSize="8sp"
+        android:text="all"
+        android:textSize="12sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.64"
+        app:layout_constraintHorizontal_bias="0.643"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.796" />
+        app:layout_constraintVertical_bias="0.795" />
 
     <Button
         android:id="@+id/word_button"
-        android:layout_width="66dp"
-        android:layout_height="45dp"
+        android:layout_width="80dp"
+        android:layout_height="60dp"
         android:onClick="wordButton"
         android:text="word"
-        android:textSize="8sp"
+        android:textSize="12sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.391"
+        app:layout_constraintHorizontal_bias="0.347"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.796" />
+        app:layout_constraintVertical_bias="0.795" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/textView"
+        android:layout_width="349dp"
+        android:layout_height="44dp"
         android:text="WhatsApp Chat Analyzer"
-        android:textColor="#7ADE06"
-        android:textSize="34sp"
+        android:background="@drawable/round_textview"
+        android:textAlignment="center"
+        android:textSize="30sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -66,8 +71,8 @@
 
     <ScrollView
         android:id="@+id/scrollView2"
-        android:layout_width="374dp"
-        android:layout_height="175dp"
+        android:layout_width="378dp"
+        android:layout_height="120dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.567"
@@ -80,16 +85,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
-            android:textColor="#000000"
             android:textSize="16sp" />
     </ScrollView>
 
     <Button
         android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="140dp"
+        android:layout_height="60dp"
         android:onClick="openFileButton"
         android:text="Open a .txt file"
+        android:textSize="12sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
@@ -98,9 +104,11 @@
         app:layout_constraintVertical_bias="0.906" />
 
     <LinearLayout
-        android:layout_width="325dp"
-        android:layout_height="311dp"
+        android:layout_width="360dp"
+        android:layout_height="360dp"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="1dp"
+        android:layout_marginEnd="20dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -125,8 +133,8 @@
             <ProgressBar
                 android:id="@+id/background_progressbar"
                 style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="300dp"
-                android:layout_height="300dp"
+                android:layout_width="360dp"
+                android:layout_height="360dp"
                 android:indeterminate="false"
                 android:max="100"
                 android:progress="100"
@@ -144,8 +152,8 @@
             <ProgressBar
                 android:id="@+id/stats_progressbar"
                 style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="300dp"
-                android:layout_height="300dp"
+                android:layout_width="360dp"
+                android:layout_height="360dp"
                 android:indeterminate="false"
                 android:max="100"
                 android:progress="100"
@@ -174,17 +182,32 @@
 
     <Button
         android:id="@+id/char_button"
-        android:layout_width="66dp"
-        android:layout_height="45dp"
+        android:layout_width="80dp"
+        android:layout_height="60dp"
         android:onClick="charButton"
-        android:text="char"
-        android:textSize="8sp"
+        android:text="@string/char_button_name"
+        android:textSize="12sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.139"
+        app:layout_constraintHorizontal_bias="0.057"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.796" />
+        app:layout_constraintVertical_bias="0.795" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="80dp"
+        android:layout_height="60dp"
+        android:text="@string/question_button_name"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.939"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.906" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

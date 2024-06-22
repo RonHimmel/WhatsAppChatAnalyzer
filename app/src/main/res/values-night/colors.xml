@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="progressColor1">@color/black</color>
+    <color name="progressColor2">@color/buttonNight</color>
+</resources>

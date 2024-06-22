@@ -2,8 +2,20 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.WhatsAppChatAnalyzer" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+        <item name="android:windowBackground">@drawable/whatsapp</item>
+        <item name="android:textColorPrimary">@color/black</item>
+
+
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/buttonDay</item>
+        <item name="colorOnPrimary">@color/black</item>
+
+
+        <!-- Background and text colors for light mode. -->
+        <item name="android:textColorSecondary">@color/buttonDay</item>
     </style>
+
 
     <style name="Theme.WhatsAppChatAnalyzer" parent="Base.Theme.WhatsAppChatAnalyzer" />
 </resources>

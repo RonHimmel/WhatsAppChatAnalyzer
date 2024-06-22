@@ -126,6 +126,20 @@ class MainActivity : AppCompatActivity() {
         buildDiagram()
     }
 
+    private fun countMessages(){
+        messageCounts.clear()
+        var lines = allMessages.lines()
+        for (line in lines) {
+            val nameEndIndex = line.indexOf(':')
+            if(nameEndIndex!=-1){                                                               //indexOf returns -1 if there is no match
+                val name = line.substring(0, nameEndIndex)
+                messageCounts[name] = messageCounts.getOrDefault(name, 0) + 1
+            }
+        }
+        textViewFileContent.text ="This is the amount of messages:\n"
+        buildDiagram()
+    }
+
     private fun showInputDialog(method: String) {
         val dialogView = layoutInflater.inflate(R.layout.popup, null)
         val searchText = dialogView.findViewById<EditText>(R.id.editText_value)
@@ -155,7 +169,7 @@ class MainActivity : AppCompatActivity() {
             builder.setView(dialogView)
             builder.setPositiveButton("Confirm") { dialog, _ ->
                 val input = searchText.text.toString()
-                if (input.isEmpty()) {
+                if (input.isEmpty() || input.length<2) {
                     Toast.makeText(this, "Please enter a word", Toast.LENGTH_SHORT).show()
                 } else {
                     val word = searchText.text.toString()
@@ -206,6 +220,8 @@ class MainActivity : AppCompatActivity() {
     fun startButton(view: View) {
         if(allMessages.isEmpty()) {
             Toast.makeText(this, "No file selected yet", Toast.LENGTH_SHORT).show()
+        }else{
+            countMessages()
         }
     }
 
@@ -223,11 +239,11 @@ class MainActivity : AppCompatActivity() {
         var one = 0
         var two = 0
         val stringBuilder = StringBuilder()
-        if(messageCounts.isEmpty()){
+        if(messageCounts.values.max()==0){                                                          //if all values are 0 there are no messages containing the search
             progressBar.visibility = View.INVISIBLE
             progressBarBackground.visibility = View.INVISIBLE
             ratioMessages.visibility = View.INVISIBLE
-            stringBuilder.append("Nothing found")
+            stringBuilder.append("There were no messages containing your search")
         }else {
             ratioMessages.visibility = View.VISIBLE
             textViewFileContent.visibility = View.VISIBLE
@@ -267,7 +283,7 @@ class MainActivity : AppCompatActivity() {
                     var line = reader.readLine()
                     while (line != null) {
                         if (line.length>17&&line[0].isDigit()&& line[16] == '-') {
-                            val trimmedLine = line.removeRange(0, 17)
+                            val trimmedLine = line.removeRange(0, 18)
                             allMessages.append(trimmedLine)
                             allMessages.append('\n')
                             val nameEndIndex = trimmedLine.indexOf(':')
@@ -279,7 +295,7 @@ class MainActivity : AppCompatActivity() {
                         line = reader.readLine()
                     }
                 }
-                textViewFileContent.text =""
+                textViewFileContent.text ="This is the amount of messages:\n"
                 buildDiagram()
             }
         } catch (e: Exception) {

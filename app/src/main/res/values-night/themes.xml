@@ -3,5 +3,11 @@
     <style name="Base.Theme.WhatsAppChatAnalyzer" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="android:windowBackground">@drawable/whatsapp_dark</item>
+        <item name="android:textColorPrimary">@color/white</item>
+
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/buttonNight</item>
+        <item name="colorOnPrimary">@color/white</item>
     </style>
 </resources>
