@@ -1,5 +1,6 @@
 package de.fra_uas.fb2.mobiledevices.whatsappchatanalyzer
 
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -13,10 +14,17 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.util.ArrayList
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,9 +33,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var textViewFileContent: TextView
     private var messageCounts = mutableMapOf<String, Int>()
     private var allMessages = StringBuilder()
+    private var uncutMessages = StringBuilder()
     private lateinit var ratioMessages: TextView
     private lateinit var progressBar: ProgressBar
     private lateinit var progressBarBackground: ProgressBar
+    private lateinit var monthlyGraph: LineChart
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +56,8 @@ class MainActivity : AppCompatActivity() {
         progressBarBackground = findViewById(R.id.background_progressbar)
         progressBarBackground.visibility = View.INVISIBLE
         progressBar.visibility = View.INVISIBLE
+        monthlyGraph = findViewById(R.id.chart)
+        monthlyGraph.visibility = View.INVISIBLE
 
         openDocumentLauncher = registerForActivityResult(
             ActivityResultContracts.OpenDocument()
@@ -55,16 +68,23 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "File selection cancelled", Toast.LENGTH_SHORT).show()
             }
         }
+
         if(viewModel.textViewContent=="") {                                                         //view model will not be used at first -> info text is shown
             textViewFileContent.text = getString(R.string.info_text)
-        }else if (viewModel.messageCounts.isNotEmpty()&& viewModel.allMessages.isNotEmpty()){
+        }else if (viewModel.messageCounts.isNotEmpty()&& viewModel.allMessages.isNotEmpty()&&viewModel.graph){
+            val text = viewModel.textViewContent                           //the first line is not made by the build diagram function so we have to add it first
+            textViewFileContent.text = text
+            allMessages=viewModel.allMessages
+            uncutMessages=viewModel.uncutMessages
+            messageCounts=viewModel.messageCounts
+            buildGraph()
+        }else if(viewModel.messageCounts.isNotEmpty()&& viewModel.allMessages.isNotEmpty()&&!viewModel.graph){
             val text = viewModel.textViewContent.split("\n")                              //the first line is not made by the build diagram function so we have to add it first
             textViewFileContent.text = text[0]+"\n"
-            allMessages.clear()
             allMessages=viewModel.allMessages
-            messageCounts.clear()
+            uncutMessages=viewModel.uncutMessages
             messageCounts=viewModel.messageCounts
-            buildDiagram()                                                                          //appends the missing lines to the text view
+            buildDiagram()
         }else textViewFileContent.text = viewModel.textViewContent
 
     }
@@ -77,6 +97,9 @@ class MainActivity : AppCompatActivity() {
         }
         if(allMessages.isNotEmpty()) {
             viewModel.allMessages = allMessages
+        }
+        if(uncutMessages.isNotEmpty()){
+            viewModel.uncutMessages = uncutMessages
         }
     }
 
@@ -243,12 +266,59 @@ class MainActivity : AppCompatActivity() {
         if(allMessages.isEmpty()) {
             Toast.makeText(this, "No file selected yet", Toast.LENGTH_SHORT).show()
         }else{
-            countMessages()
+            buildGraph()
         }
     }
 
     fun openFileButton(view: View) {
         performFileSearch()
+    }
+
+    private fun buildGraph() {
+        messageCounts.clear()
+        var lines = uncutMessages.lines()
+        for (line in lines) {
+            if(line.length>8) {
+                val month = line.substring(3, 8)
+                messageCounts[month] = messageCounts.getOrDefault(month, 0) + 1
+            }
+        }
+
+        // Convert the data to entries for the chart
+        val entries = ArrayList<Entry>()
+        var index = 0
+        for ((key, value) in messageCounts) {
+            entries.add(Entry(index.toFloat(), value.toFloat()))
+            index++
+        }
+
+        val dataSet = LineDataSet(entries, "Monthly # of messages")
+        val lineData = LineData(dataSet)
+        dataSet.color = ContextCompat.getColor(this, R.color.progressColor2)
+        dataSet.setCircleColor(Color.RED) // Set circle color
+        dataSet.circleRadius = 1f // Set circle radius
+        dataSet.valueTextColor = ContextCompat.getColor(this, R.color.font)
+        dataSet.valueTextSize = 7f // Set text size of points
+        dataSet.lineWidth= 3f
+        monthlyGraph.data = lineData
+
+        // Customize XAxis to show month names
+        monthlyGraph.xAxis.position = XAxis.XAxisPosition.BOTTOM
+        monthlyGraph.xAxis.textColor = ContextCompat.getColor(this, R.color.font)
+        monthlyGraph.axisLeft.axisMinimum = 0f
+        monthlyGraph.axisLeft.textColor = ContextCompat.getColor(this, R.color.font)
+        monthlyGraph.axisRight.isEnabled = false
+        monthlyGraph.description.isEnabled = false
+
+
+        progressBar.visibility = View.INVISIBLE
+        progressBarBackground.visibility = View.INVISIBLE
+        ratioMessages.visibility = View.INVISIBLE
+        monthlyGraph.visibility = View.VISIBLE
+        viewModel.graph = true
+
+        // Refresh the chart
+        monthlyGraph.invalidate()
     }
 
     fun questionButton(view: View) {
@@ -304,6 +374,8 @@ class MainActivity : AppCompatActivity() {
         }
         ratioMessages.text = ratio.toString()
         progressBar.progress= two.toFloat().div((two+one).toFloat()).times(100).toInt()
+        monthlyGraph.visibility = View.INVISIBLE
+        viewModel.graph = false
     }
 
     private fun readTextFromUri(uri: Uri) {
@@ -312,10 +384,13 @@ class MainActivity : AppCompatActivity() {
         try {
             contentResolver.openInputStream(uri)?.use { inputStream ->
                 BufferedReader(InputStreamReader(inputStream)).use { reader ->
+                    uncutMessages.clear()
                     allMessages.clear()
                     var line = reader.readLine()
                     while (line != null) {
                         if (line.length>17&&line[0].isDigit()&& line[16] == '-') {
+                            uncutMessages.append(line)
+                            uncutMessages.append('\n')
                             val trimmedLine = line.removeRange(0, 18)
                             allMessages.append(trimmedLine)
                             allMessages.append('\n')
