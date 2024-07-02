@@ -6,4 +6,6 @@ class MainViewModel : ViewModel() {
     var messageCounts = mutableMapOf<String, Int>()
     var allMessages = StringBuilder()
     var textViewContent: String = ""
+    var uncutMessages = StringBuilder()
+    var graph = false
 }

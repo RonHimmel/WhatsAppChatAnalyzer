@@ -160,11 +160,20 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/scrollView2">
 
-            <!-- ProgressBar that represents a total of 100% -->
+            <RelativeLayout
+                android:layout_width="360dp"
+                android:layout_height="360dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:context=".MainActivity">
 
-            <!-- ProgressBar that represents a chart slice, where "android:progress" is the % value of the slice -->
-
-            <!-- The text that goes in a center of the chart -->
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/chart"
+                    android:layout_width="360dp"
+                    android:layout_height="360dp" />
+            </RelativeLayout>
 
             <ProgressBar
                 android:id="@+id/background_progressbar"
