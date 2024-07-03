@@ -18,13 +18,15 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.util.ArrayList
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -182,7 +184,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
         textViewFileContent.text ="This is the amount of messages:\n"
-        buildDiagram()
     }
 
     private fun showInputDialog(method: String) {
@@ -245,6 +246,33 @@ class MainActivity : AppCompatActivity() {
                 dialog.dismiss()
             }
             builder.create().show()
+        }else if(method=="all"){
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Confirm your selection")
+            searchText.visibility= View.INVISIBLE
+            builder.setView(dialogView)
+            builder.setPositiveButton("Confirm") { dialog, _ ->
+                countMessages()
+                var index = 1
+                var stringBuilder = StringBuilder()
+                for ((name, count) in messageCounts) {
+                    if (index == messageCounts.size) {
+                        stringBuilder.append("Total number for $name: $count")
+                    } else stringBuilder.append("Total number for $name: $count\n")
+                    index++
+                }
+                val text = textViewFileContent.text.toString()
+                textViewFileContent.text = buildString {
+                    append(text)
+                    append(stringBuilder.toString())
+                }
+                buildGraph()
+                dialog.dismiss()
+            }
+            builder.setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            builder.create().show()
         }
     }
 
@@ -266,7 +294,7 @@ class MainActivity : AppCompatActivity() {
         if(allMessages.isEmpty()) {
             Toast.makeText(this, "No file selected yet", Toast.LENGTH_SHORT).show()
         }else{
-            buildGraph()
+            showInputDialog("all")
         }
     }
 
@@ -276,20 +304,51 @@ class MainActivity : AppCompatActivity() {
 
     private fun buildGraph() {
         messageCounts.clear()
+        var firstMonth = uncutMessages.lines()[0].substring(3, 8)
+        val count = uncutMessages.lines().size
+        val lastMonth = uncutMessages.lines()[count-2].substring(3, 8)
+        var date=""
+        var month = firstMonth.substring(0, 2).toInt()
+        var year = firstMonth.substring(3, 5).toInt()
+        while (date != lastMonth) {
+            if(month<10){
+                date = "0$month.$year"
+            }else{
+                date = "$month.$year"
+            }
+            messageCounts[date] = 0
+            if(month<12){
+                month++
+            }else{
+                month=1
+                year++
+            }
+        }
         var lines = uncutMessages.lines()
         for (line in lines) {
             if(line.length>8) {
                 val month = line.substring(3, 8)
-                messageCounts[month] = messageCounts.getOrDefault(month, 0) + 1
+                messageCounts[month] = messageCounts[month]!! + 1
             }
         }
+
+
+        // the labels that should be drawn on the XAxis are the months
+        val months = Array(messageCounts.size) { "" }
 
         // Convert the data to entries for the chart
         val entries = ArrayList<Entry>()
         var index = 0
         for ((key, value) in messageCounts) {
             entries.add(Entry(index.toFloat(), value.toFloat()))
+            months[index] = key
             index++
+        }
+
+        val formatter: ValueFormatter = object : ValueFormatter() {
+            override fun getAxisLabel(value: Float, axis: AxisBase): String {
+                return months[value.toInt()]
+            }
         }
 
         val dataSet = LineDataSet(entries, "Monthly # of messages")
@@ -309,6 +368,8 @@ class MainActivity : AppCompatActivity() {
         monthlyGraph.axisLeft.textColor = ContextCompat.getColor(this, R.color.font)
         monthlyGraph.axisRight.isEnabled = false
         monthlyGraph.description.isEnabled = false
+        monthlyGraph.xAxis.granularity = 1f
+        monthlyGraph.xAxis.valueFormatter= formatter                                                //uses the overwritten formatter to show the months instead of integers
 
 
         progressBar.visibility = View.INVISIBLE
@@ -326,6 +387,7 @@ class MainActivity : AppCompatActivity() {
         progressBar.visibility = View.INVISIBLE
         progressBarBackground.visibility = View.INVISIBLE
         ratioMessages.visibility = View.INVISIBLE
+        monthlyGraph.visibility = View.INVISIBLE
     }
 
     private fun performFileSearch() {
