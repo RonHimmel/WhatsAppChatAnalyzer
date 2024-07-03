@@ -347,7 +347,12 @@ class MainActivity : AppCompatActivity() {
 
         val formatter: ValueFormatter = object : ValueFormatter() {
             override fun getAxisLabel(value: Float, axis: AxisBase): String {
-                return months[value.toInt()]
+                val index = value.toInt()
+                return if (index >= 0 && index < months.size) {
+                    months[index]
+                } else {
+                    ""  // or return a default value
+                }
             }
         }
 
