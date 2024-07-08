@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 
 class MainViewModel : ViewModel() {
     var messageCounts = mutableMapOf<String, Int>()
-    var allMessages = StringBuilder()
-    var textViewContent: String = ""
-    var uncutMessages = StringBuilder()
-    var graph = false
+    var cutMessages = StringBuilder()
+    var infoTextViewContent: String = ""                                                                //stores the text from main text view
+    var uncutMessages = StringBuilder()                                                             //stores all messages
+    var graph = false                                                                               //checks if graph should be drawn
 }

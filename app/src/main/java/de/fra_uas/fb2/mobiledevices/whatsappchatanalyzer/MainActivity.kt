@@ -17,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.charts.LineChart                                                //imports of the library that will be used for the graph
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
@@ -30,16 +30,16 @@ import java.io.InputStreamReader
 
 class MainActivity : AppCompatActivity() {
 
-    private val viewModel: MainViewModel by viewModels()
-    private lateinit var openDocumentLauncher: ActivityResultLauncher<Array<String>>
-    private lateinit var textViewFileContent: TextView
-    private var messageCounts = mutableMapOf<String, Int>()
-    private var allMessages = StringBuilder()
-    private var uncutMessages = StringBuilder()
-    private lateinit var ratioMessages: TextView
-    private lateinit var progressBar: ProgressBar
-    private lateinit var progressBarBackground: ProgressBar
-    private lateinit var monthlyGraph: LineChart
+    private val viewModel: MainViewModel by viewModels()                                            //implements the view model
+    private lateinit var openDocumentLauncher: ActivityResultLauncher<Array<String>>                //used to open the file picker
+    private lateinit var infoTextViewContent: TextView                                              //the text view that shows the main text
+    private var messageCounts = mutableMapOf<String, Int>()                                         //holds key value pairs of the name and the amount of messages
+    private var cutMessages = StringBuilder()                                                       //holds all messages without the timestamps
+    private var uncutMessages = StringBuilder()                                                     //holds messages with timestamp
+    private lateinit var ratioMessages: TextView                                                    //the text view that shows the ratio of messages
+    private lateinit var progressBar: ProgressBar                                                   //one of the progress bars to show the ratio
+    private lateinit var progressBarBackground: ProgressBar                                         //second progress bar to show the ratio
+    private lateinit var monthlyGraph: LineChart                                                    //the chart that shows the monthly messages
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,8 +51,7 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        textViewFileContent = findViewById(R.id.text_view_file_content)
+        infoTextViewContent = findViewById(R.id.text_view_file_content)                             //now the values are getting to now their view IDs
         ratioMessages = findViewById(R.id.ratio_of_messages)
         progressBar = findViewById(R.id.stats_progressbar)
         progressBarBackground = findViewById(R.id.background_progressbar)
@@ -61,7 +60,7 @@ class MainActivity : AppCompatActivity() {
         monthlyGraph = findViewById(R.id.chart)
         monthlyGraph.visibility = View.INVISIBLE
 
-        openDocumentLauncher = registerForActivityResult(
+        openDocumentLauncher = registerForActivityResult(                                           // Set up the file picker
             ActivityResultContracts.OpenDocument()
         ) { uri: Uri? ->
             if (uri != null) {
@@ -71,51 +70,82 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        if(viewModel.textViewContent=="") {                                                         //view model will not be used at first -> info text is shown
-            textViewFileContent.text = getString(R.string.info_text)
-        }else if (viewModel.messageCounts.isNotEmpty()&& viewModel.allMessages.isNotEmpty()&&viewModel.graph){
-            val text = viewModel.textViewContent                           //the first line is not made by the build diagram function so we have to add it first
-            textViewFileContent.text = text
-            allMessages=viewModel.allMessages
+        if(viewModel.infoTextViewContent=="") {                                                         //view model will not be used at first -> info text is shown
+            infoTextViewContent.text = getString(R.string.info_text)
+        }else if (viewModel.messageCounts.isNotEmpty()&& viewModel.cutMessages.isNotEmpty()&&viewModel.graph){
+            val text = viewModel.infoTextViewContent                                                    //the first line is not made by the build diagram function so we have to add it first
+            infoTextViewContent.text = text
+            cutMessages=viewModel.cutMessages
             uncutMessages=viewModel.uncutMessages
             messageCounts=viewModel.messageCounts
             buildGraph()
-        }else if(viewModel.messageCounts.isNotEmpty()&& viewModel.allMessages.isNotEmpty()&&!viewModel.graph){
-            val text = viewModel.textViewContent.split("\n")                              //the first line is not made by the build diagram function so we have to add it first
-            textViewFileContent.text = text[0]+"\n"
-            allMessages=viewModel.allMessages
+        }else if(viewModel.messageCounts.isNotEmpty()&& viewModel.cutMessages.isNotEmpty()&&!viewModel.graph){
+            val text = viewModel.infoTextViewContent.split("\n")                              //the first line is not made by the build diagram function so we have to add it first
+            infoTextViewContent.text = text[0]+"\n"
+            cutMessages=viewModel.cutMessages
             uncutMessages=viewModel.uncutMessages
             messageCounts=viewModel.messageCounts
             buildDiagram()
-        }else textViewFileContent.text = viewModel.textViewContent
+        }else infoTextViewContent.text = viewModel.infoTextViewContent
 
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
+    override fun onSaveInstanceState(outState: Bundle) {                                            //called whenever the activity is destroyed to save the data
         super.onSaveInstanceState(outState)
-        viewModel.textViewContent = textViewFileContent.text.toString()
+        viewModel.infoTextViewContent = infoTextViewContent.text.toString()
         if(messageCounts.isNotEmpty()) {
             viewModel.messageCounts = messageCounts
         }
-        if(allMessages.isNotEmpty()) {
-            viewModel.allMessages = allMessages
+        if(cutMessages.isNotEmpty()) {
+            viewModel.cutMessages = cutMessages
         }
         if(uncutMessages.isNotEmpty()){
             viewModel.uncutMessages = uncutMessages
         }
     }
+    fun openFileButton(view: View){                                                                 //button to open a file and read the content
+        performFileSearch()
+    }
+    fun questionButton(view: View) {
+        infoTextViewContent.text = getString(R.string.question_text)
+        progressBar.visibility = View.INVISIBLE
+        progressBarBackground.visibility = View.INVISIBLE
+        ratioMessages.visibility = View.INVISIBLE
+        monthlyGraph.visibility = View.INVISIBLE
+    }
 
-    fun charButton(view: View) {
-        if(allMessages.isEmpty()) {
+    fun charButton(view: View) {                                                                    //button to select character
+        if(cutMessages.isEmpty()) {
             Toast.makeText(this, "No file selected yet", Toast.LENGTH_SHORT).show()
         }else{
             showInputDialog("char")
         }
     }
+    fun emojiButton(view: View) {                                                                   //button to select emoji
+        if(cutMessages.isEmpty()) {
+            Toast.makeText(this, "No file selected yet", Toast.LENGTH_SHORT).show()
+        }else{
+            showInputDialog("emoji")
+        }
+    }
+    fun wordButton(view: View) {                                                                    //button to select a word
+        if(cutMessages.isEmpty()) {
+            Toast.makeText(this, "No file selected yet", Toast.LENGTH_SHORT).show()
+        }else{
+            showInputDialog("word")
+        }
+    }
+    fun graphButton(view: View) {                                                                   //button to build the graph
+        if(cutMessages.isEmpty()) {
+            Toast.makeText(this, "No file selected yet", Toast.LENGTH_SHORT).show()
+        }else{
+            showInputDialog("all")
+        }
+    }
 
-    private fun countChars(char: Char) {
+    private fun countChars(char: Char) {                                                            //gets a character and iterates through all the messages
         messageCounts.clear()
-        var lines = allMessages.lines()
+        var lines = cutMessages.lines()
         for (line in lines) {
             val nameEndIndex = line.indexOf(':')
             val trimmedLine = line.removeRange(0, nameEndIndex+1)                                   //remove the name to only count the message chars
@@ -128,14 +158,14 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        textViewFileContent.text ="You searched for '$char':\n"
+        infoTextViewContent.text ="You searched for '$char':\n"
         buildDiagram()
     }
 
 
-    private fun countWords(word: String) {
+    private fun countWords(word: String) {                                                          //gets a string and iterates through all the messages
         messageCounts.clear()
-        var lines = allMessages.lines()
+        var lines = cutMessages.lines()
         for (line in lines) {
             val nameEndIndex = line.indexOf(':')
             val trimmedLine = line.removeRange(0, nameEndIndex+1)                                   //remove the name to only count the message chars
@@ -149,41 +179,66 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        textViewFileContent.text ="You searched for '$word':\n"
+        infoTextViewContent.text ="You searched for '$word':\n"
         buildDiagram()
+    }
+
+    private fun isEmoji(codePoint: Int): Boolean {
+        return codePoint in 0x1F300..0x1F6FF ||                                                 // Miscellaneous Symbols and Pictographs
+                codePoint in 0x2600..0x26FF ||                                                  // Miscellaneous Symbols
+                codePoint in 0x1F900..0x1F9FF ||                                                // Supplemental Symbols and Pictographs
+                codePoint in 0x1F1E6..0x1F1FF                                                   // Flags
     }
 
     private fun countEmoji(emoji: String) {
         messageCounts.clear()
-        var lines = allMessages.lines()
+        val lines = cutMessages.lines()
+        val emojiCodePoints = emoji.codePoints().toArray()                                          //puts the emoji in an array of codepoints (some need it e.g. 👍🏽 (thumbs up with medium skin tone): U+1F44D U+1F3FD)
         for (line in lines) {
             val nameEndIndex = line.indexOf(':')
-            val trimmedLine = line.removeRange(0, nameEndIndex+1)                                   //remove the name to only count the message chars
-            val words = trimmedLine.split(" ")
-            for (word in words) {
-                if (nameEndIndex != -1) {
-                    val name = line.substring(0, nameEndIndex)
-                    if(word.contains(emoji)) {
+            if (nameEndIndex != -1) {
+                val name = line.substring(0, nameEndIndex)
+                val message = line.substring(nameEndIndex + 1).trim()
+
+                var i = 0
+                while (i < message.length) {
+                    if (matchesEmojiAtIndex(message, i, emojiCodePoints)) {
                         messageCounts[name] = messageCounts.getOrDefault(name, 0) + 1
-                    }else messageCounts[name] = messageCounts.getOrDefault(name, 0)
+                        i += emojiCodePoints.size                                                   //if emoji was found we move the index by the length of the emoji
+                    } else {
+                        i++                                                                         //if not we just move the index by one
+                        messageCounts[name] = messageCounts.getOrDefault(name, 0)
+                    }
                 }
             }
         }
-        textViewFileContent.text ="You searched for '$emoji':\n"
+
+        infoTextViewContent.text = "You searched for '$emoji':\n"
         buildDiagram()
+    }
+
+    private fun matchesEmojiAtIndex(message: String, startIndex: Int, emojiCodePoints: IntArray): Boolean {
+        var j = startIndex
+        for (i in emojiCodePoints.indices) {
+            if (j >= message.length) return false
+            val codePoint = message.codePointAt(j)
+            if (codePoint != emojiCodePoints[i]) return false
+            j += Character.charCount(codePoint)                                                     //we need to increment j by 2 if we have a surrogate pair
+        }
+        return true
     }
 
     private fun countMessages(){
         messageCounts.clear()
-        var lines = allMessages.lines()
+        var lines = cutMessages.lines()
         for (line in lines) {
             val nameEndIndex = line.indexOf(':')
-            if(nameEndIndex!=-1){                                                               //indexOf returns -1 if there is no match
+            if(nameEndIndex!=-1){                                                                   //indexOf returns -1 if there is no match
                 val name = line.substring(0, nameEndIndex)
                 messageCounts[name] = messageCounts.getOrDefault(name, 0) + 1
             }
         }
-        textViewFileContent.text ="This is the amount of messages:\n"
+        infoTextViewContent.text ="This is the amount of messages:\n"
     }
 
     private fun showInputDialog(method: String) {
@@ -215,7 +270,7 @@ class MainActivity : AppCompatActivity() {
             builder.setView(dialogView)
             builder.setPositiveButton("Confirm") { dialog, _ ->
                 val input = searchText.text.toString()
-                if (input.isEmpty() || input.length<2) {
+                if (input.isEmpty() || input.length<2||isEmoji(input.codePointAt(0))) {
                     Toast.makeText(this, "Please enter a word", Toast.LENGTH_SHORT).show()
                 } else {
                     val word = searchText.text.toString()
@@ -253,19 +308,7 @@ class MainActivity : AppCompatActivity() {
             builder.setView(dialogView)
             builder.setPositiveButton("Confirm") { dialog, _ ->
                 countMessages()
-                var index = 1
-                var stringBuilder = StringBuilder()
-                for ((name, count) in messageCounts) {
-                    if (index == messageCounts.size) {
-                        stringBuilder.append("Total number for $name: $count")
-                    } else stringBuilder.append("Total number for $name: $count\n")
-                    index++
-                }
-                val text = textViewFileContent.text.toString()
-                textViewFileContent.text = buildString {
-                    append(text)
-                    append(stringBuilder.toString())
-                }
+                buildInfoText()
                 buildGraph()
                 dialog.dismiss()
             }
@@ -276,30 +319,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun emojiButton(view: View) {
-        if(allMessages.isEmpty()) {
-            Toast.makeText(this, "No file selected yet", Toast.LENGTH_SHORT).show()
-        }else{
-            showInputDialog("emoji")
+    private fun buildInfoText(){
+        var index = 1
+        var stringBuilder = StringBuilder()
+        for ((name, count) in messageCounts) {
+            if (index == messageCounts.size) {
+                stringBuilder.append("Total number for $name: $count")
+            } else stringBuilder.append("Total number for $name: $count\n")
+            index++
         }
-    }
-    fun wordButton(view: View) {
-        if(allMessages.isEmpty()) {
-            Toast.makeText(this, "No file selected yet", Toast.LENGTH_SHORT).show()
-        }else{
-            showInputDialog("word")
+        val text = infoTextViewContent.text.toString()
+        infoTextViewContent.text = buildString {
+            append(text)
+            append(stringBuilder.toString())
         }
-    }
-    fun startButton(view: View) {
-        if(allMessages.isEmpty()) {
-            Toast.makeText(this, "No file selected yet", Toast.LENGTH_SHORT).show()
-        }else{
-            showInputDialog("all")
-        }
-    }
-
-    fun openFileButton(view: View) {
-        performFileSearch()
     }
 
     private fun buildGraph() {
@@ -387,13 +420,6 @@ class MainActivity : AppCompatActivity() {
         monthlyGraph.invalidate()
     }
 
-    fun questionButton(view: View) {
-        textViewFileContent.text = getString(R.string.question_text)
-        progressBar.visibility = View.INVISIBLE
-        progressBarBackground.visibility = View.INVISIBLE
-        ratioMessages.visibility = View.INVISIBLE
-        monthlyGraph.visibility = View.INVISIBLE
-    }
 
     private fun performFileSearch() {
         // Trigger the document picker
@@ -403,6 +429,7 @@ class MainActivity : AppCompatActivity() {
     private fun buildDiagram(){
         val ratio = StringBuilder()
         var one = 0
+        var first = true
         var two = 0
         val stringBuilder = StringBuilder()
         if(messageCounts.values.max()==0){                                                          //if all values are 0 there are no messages containing the search
@@ -412,7 +439,7 @@ class MainActivity : AppCompatActivity() {
             stringBuilder.append("There were no messages containing your search")
         }else {
             ratioMessages.visibility = View.VISIBLE
-            textViewFileContent.visibility = View.VISIBLE
+            infoTextViewContent.visibility = View.VISIBLE
             progressBar.visibility = View.VISIBLE
             progressBarBackground.visibility = View.VISIBLE
             var index = 1
@@ -421,25 +448,28 @@ class MainActivity : AppCompatActivity() {
                     stringBuilder.append("Total number for $name: $count")
                 }else stringBuilder.append("Total number for $name: $count\n")
                 index++
-                if (one == 0) {
+                if (first) {
                     one = count
+                    first = false
                     ratio.append("$count/")
-                } else if (two == 0) {
+                } else{
                     two = count
                     ratio.append("$count")
-                } else if (two != 0) {
-                    progressBar.visibility = View.INVISIBLE
-                    progressBarBackground.visibility = View.INVISIBLE
-                    ratioMessages.visibility = View.INVISIBLE
                 }
             }
         }
-        val text = textViewFileContent.text.toString()
-        textViewFileContent.text = buildString {
+        ratioMessages.text = ratio.toString()
+        if(messageCounts.size>2) {
+            progressBar.visibility = View.INVISIBLE
+            progressBarBackground.visibility = View.INVISIBLE
+            ratioMessages.visibility = View.VISIBLE
+            ratioMessages.text = "no pie chart for group chats"
+        }
+        val text = infoTextViewContent.text.toString()
+        infoTextViewContent.text = buildString {
             append(text)
             append(stringBuilder.toString())
         }
-        ratioMessages.text = ratio.toString()
         progressBar.progress= two.toFloat().div((two+one).toFloat()).times(100).toInt()
         monthlyGraph.visibility = View.INVISIBLE
         viewModel.graph = false
@@ -452,15 +482,15 @@ class MainActivity : AppCompatActivity() {
             contentResolver.openInputStream(uri)?.use { inputStream ->
                 BufferedReader(InputStreamReader(inputStream)).use { reader ->
                     uncutMessages.clear()
-                    allMessages.clear()
+                    cutMessages.clear()
                     var line = reader.readLine()
                     while (line != null) {
                         if (line.length>17&&line[0].isDigit()&& line[16] == '-') {
                             uncutMessages.append(line)
                             uncutMessages.append('\n')
                             val trimmedLine = line.removeRange(0, 18)
-                            allMessages.append(trimmedLine)
-                            allMessages.append('\n')
+                            cutMessages.append(trimmedLine)
+                            cutMessages.append('\n')
                             val nameEndIndex = trimmedLine.indexOf(':')
                             if (nameEndIndex != -1) {
                                 val name = trimmedLine.substring(0, nameEndIndex)
@@ -470,7 +500,7 @@ class MainActivity : AppCompatActivity() {
                         line = reader.readLine()
                     }
                 }
-                textViewFileContent.text ="This is the amount of messages:\n"
+                infoTextViewContent.text ="This is the amount of messages:\n"
                 buildDiagram()
             }
         } catch (e: Exception) {

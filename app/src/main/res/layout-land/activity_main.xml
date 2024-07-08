@@ -110,7 +110,7 @@
         android:id="@+id/start_button"
         android:layout_width="80dp"
         android:layout_height="60dp"
-        android:onClick="startButton"
+        android:onClick="graphButton"
         android:text="all"
         android:textSize="12sp"
         android:textStyle="bold"
