@@ -4,4 +4,6 @@
     <string name="char_button_name">char</string>
     <string name="question_button_name">Q&amp;A</string>
     <string name="question_text"><![CDATA[Questions and answers: (Scroll through them)\n\nWhat does the char button do?\n->you can choose a single letter to search through all the messages and get the amount\n\nWhat does the word button do?\n->choose a word that you want to search through all the messages\n\nWhat does the all button do?\n->get the amount of all messages and show them in a monthly timeline graph\n\nWhat does the emoji button do?\n->choose an emoji and get the amount of the usage\n\nHow can i get a text file to use in this app?\n->export the chat in whatsapp by opening a chat and pressing the 3 dots on the right top corner and selecting more and then export chat]]></string>
+    <string name="amount_of_messages">This is the amount of messages:\n</string>
+    <string name="error_for_group_chats">no pie chart for group chats</string>
 </resources>

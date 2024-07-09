@@ -98,7 +98,7 @@
         app:layout_constraintVertical_bias="0.833" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/titleTextView"
         android:layout_width="349dp"
         android:layout_height="44dp"
         android:background="@drawable/round_textview"
@@ -115,7 +115,7 @@
 
 
     <ScrollView
-        android:id="@+id/scrollView2"
+        android:id="@+id/scrollViewInfoText"
         android:layout_width="377dp"
         android:layout_height="142dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -146,11 +146,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.674"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/scrollView2"
+        app:layout_constraintTop_toBottomOf="@+id/scrollViewInfoText"
         app:layout_constraintVertical_bias="0.0">
 
 
-        <!-- Doughnut chart starts here -->
+        <!--constraint layout for the chart and the graph -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintLayout"
             android:layout_width="wrap_content"
@@ -159,7 +159,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/scrollView2">
+            app:layout_constraintTop_toBottomOf="@+id/scrollViewInfoText">
 
             <RelativeLayout
                 android:layout_width="360dp"
@@ -169,42 +169,40 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:context=".MainActivity">
-
+                <!-- https://weeklycoding.com/mpandroidchart-documentation/-->
                 <com.github.mikephil.charting.charts.LineChart
                     android:id="@+id/chart"
                     android:layout_width="360dp"
                     android:layout_height="360dp" />
             </RelativeLayout>
 
-            <!-- ProgressBar that represents a total of 100% -->
+            <!-- ProgressBar that represents the first chat partner -->
             <ProgressBar
-                android:id="@+id/background_progressbar"
+                android:id="@+id/user_one_progressbar"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="360dp"
                 android:layout_height="360dp"
                 android:indeterminate="false"
                 android:max="100"
                 android:progress="100"
-                android:progressDrawable="@drawable/stats_full"
+                android:progressDrawable="@drawable/progress_bar_two_attributes"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- ProgressBar that represents a chart slice, where "android:progress" is the % value of the slice -->
-
-            <!-- The text that goes in a center of the chart -->
+            <!-- ProgressBar that represents the other user -->
 
             <ProgressBar
-                android:id="@+id/stats_progressbar"
+                android:id="@+id/user_two_progressbar"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="360dp"
                 android:layout_height="360dp"
                 android:indeterminate="false"
                 android:max="100"
                 android:progress="100"
-                android:progressDrawable="@drawable/stats_progress"
+                android:progressDrawable="@drawable/progress_bar_one_attributes"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
@@ -225,7 +223,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
-        <!-- Doughnut chart ends here -->
     </LinearLayout>
 
 
