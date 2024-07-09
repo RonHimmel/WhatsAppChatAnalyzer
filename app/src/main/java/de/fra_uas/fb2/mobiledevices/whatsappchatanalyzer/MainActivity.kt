@@ -431,18 +431,18 @@ class MainActivity : AppCompatActivity() {
             progressBar.visibility = View.VISIBLE
             progressBarBackground.visibility = View.VISIBLE
             var index = 1
-            for ((name, count) in messageCounts) {
-                if(index==messageCounts.size) {
+            for ((name, count) in messageCounts) {                                                  //iterates through the map
+                if(index==messageCounts.size) {                                                     //if it is the last element we add a new line
                     stringBuilder.append("Total number for $name: $count")
                 }else stringBuilder.append("Total number for $name: $count\n")
                 index++
-                if (first) {
-                    one = count
-                    first = false
-                    ratio.append("$count/")
+                if (first) {                                                                        //if the first person is selected
+                    one = count                                                                     //save the amount of messages for the first person
+                    first = false                                                                   //make sure that the first person is not selected anymore
+                    ratio.append("$count/")                                                         //add the amount of messages for the first person to the ratio
                 } else{
-                    two = count
-                    ratio.append("$count")
+                    two = count                                                                     //save the amount of messages for the second person
+                    ratio.append("$count")                                                          //add the amount of messages for the second person to the ratio
                 }
             }
         }
